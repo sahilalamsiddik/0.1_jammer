@@ -1,4 +1,4 @@
-# connections
+## connections
 
 
 | NRF24 | ESP32         |
