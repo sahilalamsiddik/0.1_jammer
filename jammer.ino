@@ -11,7 +11,7 @@ int hashTable[MAX];
 int hash(int key) {
     return key % MAX;
 }
-/* Insert using Linear Probing */
+
 void insert(int key) {
     int index = hash(key);
     while (hashTable[index] != -1) {
