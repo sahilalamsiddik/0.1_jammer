@@ -15,7 +15,7 @@ int hash(int key) {
 void insert(int key) {
     int index = hash(key);
     while (hashTable[index] != -1) {
-        index = (index + 1) % MAX;   // linear probing
+        index = (index + 1) % MAX;   
     }
     hashTable[index] = key;
     printf("Enter emp id: ");
