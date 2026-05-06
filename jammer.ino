@@ -6,7 +6,7 @@ struct employee {
     char name[20];
 };     
 
-
+#gg
 struct employee emp[MAX];
 int hashTable[MAX];
 /* Hash function */
