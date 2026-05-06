@@ -5,6 +5,8 @@ struct employee {
     int id;
     char name[20];
 };     
+
+
 struct employee emp[MAX];
 int hashTable[MAX];
 /* Hash function */
