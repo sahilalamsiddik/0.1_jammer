@@ -1,64 +1,106 @@
-#include <stdio.h>
-#include <string.h>
-#define MAX 10
-struct employee {
-    int id;
-    char name[20];
-};     
+#include "RF24.h"
+#include <ezButton.h>
+#include "esp_bt.h"
+#include "esp_wifi.h"
 
-#gg
-struct employee emp[MAX];
-int hashTable[MAX];
-/* Hash function */
-int hash(int key) {
-    return key % MAX;
+SPIClass *sp = nullptr;
+
+//HSPI=SCK = 14, MISO = 12, MOSI = 13, CS = 15 , CE = 16
+//VSPI=SCK = 18, MISO =19, MOSI = 23 ,CS =21 ,CE = 22
+
+
+RF24 radio(22, 21, 16000000);  ///DEFAULT 10000000
+
+byte i = 45;  ///37-50 CHANNEL (CHANNEL NRF NEEDS TO START )
+
+unsigned int flag = 0;
+
+
+ezButton toggleSwitch(33);
+
+
+void initSP() {
+  sp = new SPIClass(VSPI);
+  sp->begin();
+  if (radio.begin(sp)) {
+    delay(1000);
+    Serial.println("Sp Started !!!");
+    radio.setAutoAck(false);
+    radio.stopListening();
+    radio.setRetries(0, 0);
+    radio.setPayloadSize(5);   ////SET VALUE ON RF24.CPP
+    radio.setAddressWidth(3);  ////SET VALUE ON RF24.CPP
+    radio.setPALevel(RF24_PA_MAX, true);
+    radio.setDataRate(RF24_2MBPS);
+    radio.setCRCLength(RF24_CRC_DISABLED);
+    radio.printPrettyDetails();
+    radio.startConstCarrier(RF24_PA_MAX, i);  ////EDITED VALUES ON LIBRARY ....SET 5 BYTES PAYLOAD SIZE//REDUCE RF24_MAX TO RF24_HIGH OR LOW IF RF NOT STABLE
+
+
+
+  } else {
+    Serial.println("SP couldn't start !!!");
+  }
+}
+void two() {
+
+  ///CHANNEL WITH 2 SPACING HOPPING
+  if (flag == 0) {
+    i += 2;
+  } else {
+    i -= 2;
+  }
+
+  if ((i > 79) && (flag == 0)) {
+    flag = 1;
+  } else if ((i < 2) && (flag == 1)) {
+    flag = 0;
+  }
+
+  radio.setChannel(i);
+  // Serial.println(i);
 }
 
-void insert(int key) {
-    int index = hash(key);
-    while (hashTable[index] != -1) {
-        index = (index + 1) % MAX;   
-    }
-    hashTable[index] = key;
-    printf("Enter emp id: ");
-    scanf("%d", &emp[index].id);
-    printf("Enter emp name: ");
-    scanf("%s", emp[index].name);
+void one() {
+  for (int i = 0; i < 15; i++) {
+    radio.setChannel(i);
+  }
 }
-/* Display function */
-void display() {
-    int ch;
-    printf("\n1.Display All\n2.Filtered Display");
-    printf("\nEnter choice: ");
-    scanf("%d", &ch);
-    printf("\nHTKey\tEmpID\tEmpName\n");
-    for (int i = 0; i < MAX; i++) {
-        if (ch == 1) {
-            printf("%d\t%d\t%s\n", i, emp[i].id, emp[i].name);
-        } else {
-            if (hashTable[i] != -1) {
-                printf("%d\t%d\t%s\n", i, emp[i].id, emp[i].name);
-            }
-        }
-    }
-}
-int main() {
-    int key, ans = 1;
-    for (int i = 0; i < MAX; i++) {
-        hashTable[i] = -1;
-        emp[i].id = 0;
-        strcpy(emp[i].name, "");
-    }
-    printf("Collision handling by linear probing\n");
-    while (ans) {
-        printf("\nEnter the data: ");
-        scanf("%d", &key);
 
-        insert(key);
+// radio.setChannel(random(79));
 
-        printf("Do you wish to continue? (1/0): ");
-        scanf("%d", &ans);
-    }
-    display();
-    return 0;
+
+
+
+void setup(void) {
+  pinMode(33, INPUT_PULLUP);  // BUILD-IN RESISTOR
+  esp_bt_controller_deinit();
+  esp_wifi_stop();
+  esp_wifi_deinit();
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println("Setup started...");
+  toggleSwitch.setDebounceTime(50);
+  initSP();
 }
+
+
+void loop(void) {
+
+  toggleSwitch.loop();  // MUST call the loop() function first
+
+  if (toggleSwitch.isPressed())
+    Serial.println("one");
+  if (toggleSwitch.isReleased())
+    Serial.println("two");
+
+  int state = toggleSwitch.getState();
+
+
+  if (state == HIGH)
+    two();
+
+  else {
+    one();
+  }
+}                           edit the code and make it only run in esp32 not required nrf24l01 ,,write the code like this
