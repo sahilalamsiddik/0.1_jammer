@@ -14,6 +14,10 @@
 | MISO  | GPIO 19       |
 | IRQ   | Not connected |
 | ------|---------------|
+|button | ESP32         |
+| ------| ------------- |
+|one side| GND          |
+|other  | GPIO 33       |
 
 
 
