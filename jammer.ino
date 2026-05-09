@@ -103,4 +103,4 @@ void loop(void) {
   else {
     one();
   }
-}                           edit the code and make it only run in esp32 not required nrf24l01 ,,write the code like this
+}                           
