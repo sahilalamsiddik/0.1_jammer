@@ -95,7 +95,7 @@ void loop(void) {
     Serial.println("two");
 
   int state = toggleSwitch.getState();
-
+//ok
 
   if (state == HIGH)
     two();
